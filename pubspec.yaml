@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   auto_route: ^9.3.0+1
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
