@@ -17,16 +17,16 @@ part 'app_router.gr.dart';
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: HomeRoute.page, initial: true),
+    CustomRoute(page: HomeRoute.page, initial: true, transitionsBuilder: TransitionsBuilders.noTransition),
+    CustomRoute(page: CreateAIProfileRoute.page, transitionsBuilder: TransitionsBuilders.noTransition),
+    CustomRoute(page: DiscussionRoute.page, transitionsBuilder: TransitionsBuilders.noTransition),
+    CustomRoute(page: ProfileRoute.page, transitionsBuilder: TransitionsBuilders.noTransition),
     AutoRoute(page: LoginRoute.page),
     AutoRoute(page: SignupRoute.page),
     AutoRoute(page: PostDetailRoute.page),
-    AutoRoute(page: DiscussionRoute.page),
     AutoRoute(page: DiscussionDetailRoute.page),
-    AutoRoute(page: ProfileRoute.page),
     AutoRoute(page: FollowersRoute.page),
     AutoRoute(page: FollowersRoute.page),
-    AutoRoute(page: CreateAIProfileRoute.page),
     AutoRoute(page: SettingsRoute.page),
   ];
 }
