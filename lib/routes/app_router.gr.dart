@@ -144,10 +144,21 @@ class LoginRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [PostDetailScreen]
-class PostDetailRoute extends PageRouteInfo<void> {
-  const PostDetailRoute({List<PageRouteInfo>? children})
-      : super(
+class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
+  PostDetailRoute({
+    dynamic key,
+    required String sender,
+    required String message,
+    required DateTime timestamp,
+    List<PageRouteInfo>? children,
+  }) : super(
           PostDetailRoute.name,
+          args: PostDetailRouteArgs(
+            key: key,
+            sender: sender,
+            message: message,
+            timestamp: timestamp,
+          ),
           initialChildren: children,
         );
 
@@ -156,9 +167,37 @@ class PostDetailRoute extends PageRouteInfo<void> {
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const PostDetailScreen();
+      final args = data.argsAs<PostDetailRouteArgs>();
+      return PostDetailScreen(
+        key: args.key,
+        sender: args.sender,
+        message: args.message,
+        timestamp: args.timestamp,
+      );
     },
   );
+}
+
+class PostDetailRouteArgs {
+  const PostDetailRouteArgs({
+    this.key,
+    required this.sender,
+    required this.message,
+    required this.timestamp,
+  });
+
+  final dynamic key;
+
+  final String sender;
+
+  final String message;
+
+  final DateTime timestamp;
+
+  @override
+  String toString() {
+    return 'PostDetailRouteArgs{key: $key, sender: $sender, message: $message, timestamp: $timestamp}';
+  }
 }
 
 /// generated route for

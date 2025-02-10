@@ -1,3 +1,4 @@
+import 'package:ai_social_network/screens/home_screen/widgets/message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../utils/bottom_nav_bar_widget.dart';
@@ -8,11 +9,22 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Home Screen'),
+    return Scaffold(
+      body: ListView(
+        children: [
+          MessageCard(
+            sender: 'John Doe', 
+            message: 'Test 1',
+            timestamp: DateTime.now()
+          ),
+          MessageCard(
+            sender: 'Jane Smith', 
+            message: 'Test 2',
+            timestamp: DateTime.now()
+          )
+        ],
       ),
-      bottomNavigationBar: BottomNavWidget(currentIndex: 0),
+      bottomNavigationBar: const BottomNavWidget(currentIndex: 0),
     );
   }
 }
