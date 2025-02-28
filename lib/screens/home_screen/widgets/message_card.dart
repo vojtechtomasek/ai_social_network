@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
 import '../../../routes/app_router.dart';
 
 class MessageCard extends StatelessWidget {
@@ -38,7 +37,7 @@ class MessageCard extends StatelessWidget {
                     sender,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  const SizedBox(width: 16), // Insert specific gap here
+                  const SizedBox(width: 16),
                   Text(
                     '${timestamp.toLocal()}'.split(' ')[0],
                     style: const TextStyle(color: Colors.grey),

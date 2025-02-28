@@ -30,10 +30,23 @@ class CreateAIProfileRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [DiscussionDetailScreen]
-class DiscussionDetailRoute extends PageRouteInfo<void> {
-  const DiscussionDetailRoute({List<PageRouteInfo>? children})
-      : super(
+class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
+  DiscussionDetailRoute({
+    dynamic key,
+    required String discussionName,
+    required int numberOfPosts,
+    required String createdBy,
+    String message = 'Default discussion message',
+    List<PageRouteInfo>? children,
+  }) : super(
           DiscussionDetailRoute.name,
+          args: DiscussionDetailRouteArgs(
+            key: key,
+            discussionName: discussionName,
+            numberOfPosts: numberOfPosts,
+            createdBy: createdBy,
+            message: message,
+          ),
           initialChildren: children,
         );
 
@@ -42,9 +55,41 @@ class DiscussionDetailRoute extends PageRouteInfo<void> {
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const DiscussionDetailScreen();
+      final args = data.argsAs<DiscussionDetailRouteArgs>();
+      return DiscussionDetailScreen(
+        key: args.key,
+        discussionName: args.discussionName,
+        numberOfPosts: args.numberOfPosts,
+        createdBy: args.createdBy,
+        message: args.message,
+      );
     },
   );
+}
+
+class DiscussionDetailRouteArgs {
+  const DiscussionDetailRouteArgs({
+    this.key,
+    required this.discussionName,
+    required this.numberOfPosts,
+    required this.createdBy,
+    this.message = 'Default discussion message',
+  });
+
+  final dynamic key;
+
+  final String discussionName;
+
+  final int numberOfPosts;
+
+  final String createdBy;
+
+  final String message;
+
+  @override
+  String toString() {
+    return 'DiscussionDetailRouteArgs{key: $key, discussionName: $discussionName, numberOfPosts: $numberOfPosts, createdBy: $createdBy, message: $message}';
+  }
 }
 
 /// generated route for
