@@ -284,20 +284,20 @@ class SettingsRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [SignupScreen]
-class SignupRoute extends PageRouteInfo<void> {
-  const SignupRoute({List<PageRouteInfo>? children})
+/// [SignUpScreen]
+class SignUpRoute extends PageRouteInfo<void> {
+  const SignUpRoute({List<PageRouteInfo>? children})
       : super(
-          SignupRoute.name,
+          SignUpRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'SignupRoute';
+  static const String name = 'SignUpRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const SignupScreen();
+      return const SignUpScreen();
     },
   );
 }
