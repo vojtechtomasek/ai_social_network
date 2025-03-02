@@ -1,4 +1,6 @@
 import 'package:ai_social_network/routes/app_router.dart';
+import 'package:ai_social_network/utils/auth_button.dart';
+import 'package:ai_social_network/utils/auth_text_field.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -15,8 +17,8 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
 
   @override
@@ -47,8 +49,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => isLoading = true);
     try {
       final response = await supabase.auth.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        emailRedirectTo: 'io.supabase.flutterquickstart://login-callback/',
       );
 
       if (response.user?.id != null) {
@@ -87,26 +90,92 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : _signUpWithEmail,
-              child: const Text('Sign Up with Email'),
+      body: Align(
+        alignment: const Alignment(0.0, -0.7),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Google button
+                AuthButton(
+                  onPressed: _googleSignIn, 
+                  icon: const Icon(Icons.g_mobiledata_sharp, size: 30,), 
+                  label: 'Sign Up with Google'
+                ),
+
+                const SizedBox(height: 24),
+                
+                // OR divider
+                const Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+                
+                // Email and password fields
+                AuthTextField(
+                  controller: _emailController, 
+                  label: 'Your Email', 
+                  hintText: 'Email'
+                ),
+
+                const SizedBox(height: 16),
+                
+                AuthTextField(
+                  controller: _passwordController, 
+                  label: 'Your Password', 
+                  hintText: 'Password', 
+                  obscureText: true
+                ),
+
+                const SizedBox(height: 20),
+                
+                // Email sign up button
+                AuthButton(
+                  onPressed: _signUpWithEmail, 
+                  icon: const Icon(Icons.email, size: 20,), 
+                  label: 'Sign Up with Email',
+                  isLoading: isLoading,
+                ),
+
+                const SizedBox(height: 16),
+                
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.router.push(const LoginRoute()),
+                    child: const Text('Already have an account? Log in'),
+                  ),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: _googleSignIn,
-              child: const Text('Sign Up with Google'),
-            ),
-            TextButton(
-              onPressed: () => context.router.push(const LoginRoute()),
-              child: const Text('Already have an account? Log in'),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,4 +1,6 @@
 import 'package:ai_social_network/routes/app_router.dart';
+import 'package:ai_social_network/utils/auth_button.dart';
+import 'package:ai_social_network/utils/auth_text_field.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,22 +38,51 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Log In')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : _loginWithEmail,
-              child: const Text('Log In'),
+      body: Align(
+        alignment: const Alignment(0, -0.7),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AuthTextField(
+                  controller: _emailController, 
+                  label: 'Your Email', 
+                  hintText: 'Email'
+                ),
+
+                const SizedBox(height: 16),
+
+                AuthTextField(
+                  controller: _passwordController, 
+                  label: 'Your Password', 
+                  hintText: 'Password', 
+                  obscureText: true
+                ),
+
+                const SizedBox(height: 20),
+                
+                AuthButton(
+                  onPressed: _loginWithEmail, 
+                  icon: const Icon(Icons.email), 
+                  label: 'Log In', 
+                  isLoading: isLoading
+                ),
+
+                const SizedBox(height: 16),
+                
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.router.back(),
+                    child: const Text('Don’t have an account? Sign up'),
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => context.router.replace(const SignUpRoute()),
-              child: const Text('Don’t have an account? Sign up'),
-            ),
-          ],
+          ),
         ),
       ),
     );
