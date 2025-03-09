@@ -19,6 +19,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   bool isLoading = false;
 
   @override
@@ -28,20 +30,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _checkSession();
   }
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _firstNameController.dispose();
+    super.dispose();
+  }
+
   void _setupAuthListener() {
-  supabase.auth.onAuthStateChange.listen((data) {
-    if (!mounted) return;
-    final event = data.event;
-    if (event == AuthChangeEvent.signedIn) {
-      context.router.replace(const HomeRoute());
-    }
-  });
-}
+    supabase.auth.onAuthStateChange.listen((data) {
+      if (!mounted) return;
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        context.router.replace(const HomeRoute());
+      }
+    });
+  }
 
   Future<void> _checkSession() async {
     final session = supabase.auth.currentSession;
     if (session != null) {
       context.router.replace(const HomeRoute());
+    }
+  }
+
+  Future<void> _createUserProfile({
+    required String userId,
+    required String email,
+    String? firstName,
+    String? lastName,
+    String? userName,
+    String? bio,
+  }) async {
+    try {
+      await supabase.from('users').insert({
+        'id': userId,
+        'email': email,
+        'first_name': firstName ?? '',
+        'last_name': lastName ?? '',
+        'user_name': userName ?? '',
+        'bio': bio ?? '',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      print('Profile created successfully for user: $userId');
+    } catch (e) {
+      print('Error creating user profile: $e');
     }
   }
 
@@ -55,12 +89,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (response.user?.id != null) {
+        await _createUserProfile(
+          userId: response.user!.id,
+          email: _emailController.text.trim(),
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          userName: _emailController.text.split('@')[0],
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Check your email to verify your account.')),
+          const SnackBar(
+              content: Text('Check your email to verify your account.')),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => isLoading = false);
     }
@@ -79,11 +123,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (googleAuth == null) throw 'Google Sign-In failed';
 
-    return supabase.auth.signInWithIdToken(
+    final response = await supabase.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: googleAuth.idToken!,
       accessToken: googleAuth.accessToken!,
     );
+
+    if (response.user != null) {
+      final email = googleUser?.email;
+      final fullName = googleUser?.displayName ?? '';
+      String firstName = '';
+      String lastName = '';
+
+      if (fullName.contains(' ')) {
+        firstName = fullName.split(' ').first;
+        lastName = fullName.split(' ').last;
+      } else {
+        firstName = fullName;
+      }
+
+      await _createUserProfile(
+        userId: response.user!.id,
+        email: email ?? '',
+        firstName: firstName,
+        lastName: lastName,
+        userName: email?.split('@')[0],
+      );
+    }
+
+    return response;
   }
 
   @override
@@ -102,13 +170,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 // Google button
                 AuthButton(
-                  onPressed: _googleSignIn, 
-                  icon: const Icon(Icons.g_mobiledata_sharp, size: 30,), 
-                  label: 'Sign Up with Google'
-                ),
+                    onPressed: _googleSignIn,
+                    icon: const Icon(
+                      Icons.g_mobiledata_sharp,
+                      size: 30,
+                    ),
+                    label: 'Sign Up with Google'),
 
                 const SizedBox(height: 24),
-                
+
                 // OR divider
                 const Row(
                   children: [
@@ -138,35 +208,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                
-                // Email and password fields
+
+                // First name and last name fields
                 AuthTextField(
-                  controller: _emailController, 
-                  label: 'Your Email', 
-                  hintText: 'Email'
-                ),
+                    controller: _firstNameController,
+                    label: 'First Name',
+                    hintText: 'First Name'),
 
                 const SizedBox(height: 16),
-                
+
                 AuthTextField(
-                  controller: _passwordController, 
-                  label: 'Your Password', 
-                  hintText: 'Password', 
-                  obscureText: true
-                ),
+                    controller: _lastNameController,
+                    label: 'Last Name',
+                    hintText: 'Last Name'),
+
+                const SizedBox(height: 16),
+
+                // Email and password fields
+                AuthTextField(
+                    controller: _emailController,
+                    label: 'Your Email',
+                    hintText: 'Email'),
+
+                const SizedBox(height: 16),
+
+                AuthTextField(
+                    controller: _passwordController,
+                    label: 'Your Password',
+                    hintText: 'Password',
+                    obscureText: true),
 
                 const SizedBox(height: 20),
-                
+
                 // Email sign up button
                 AuthButton(
-                  onPressed: _signUpWithEmail, 
-                  icon: const Icon(Icons.email, size: 20,), 
+                  onPressed: _signUpWithEmail,
+                  icon: const Icon(
+                    Icons.email,
+                    size: 20,
+                  ),
                   label: 'Sign Up with Email',
                   isLoading: isLoading,
                 ),
 
                 const SizedBox(height: 16),
-                
+
                 Center(
                   child: TextButton(
                     onPressed: () => context.router.push(const LoginRoute()),
