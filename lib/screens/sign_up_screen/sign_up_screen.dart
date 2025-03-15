@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../../models/user_model.dart';
+
 @RoutePage()
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -64,15 +66,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String? bio,
   }) async {
     try {
-      await supabase.from('users').insert({
-        'id': userId,
-        'email': email,
-        'first_name': firstName ?? '',
-        'last_name': lastName ?? '',
-        'user_name': userName ?? '',
-        'bio': bio ?? '',
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      final user = UserModel(
+        id: userId,
+        email: email,
+        firstName: firstName ?? '',
+        lastName: lastName ?? '',
+        userName: userName ?? '',
+        bio: bio ?? '',
+      );
+  
+      // Insert using the model
+      await supabase.from('users').insert(user.toMap());
       print('Profile created successfully for user: $userId');
     } catch (e) {
       print('Error creating user profile: $e');

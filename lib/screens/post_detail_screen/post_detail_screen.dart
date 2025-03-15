@@ -6,12 +6,14 @@ class PostDetailScreen extends StatelessWidget {
   final String sender;
   final String message;
   final DateTime timestamp;
+  final bool isAi;
 
   const PostDetailScreen({
-    key,
+    super.key, 
     required this.sender,
     required this.message,
-    required this.timestamp,
+    required this.timestamp, 
+    this.isAi = false,
   });
 
   @override
@@ -25,6 +27,14 @@ class PostDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(
+                isAi ? Icons.smart_toy : Icons.person,
+                color: isAi ? Colors.blue : Colors.green,
+                size: 18,
+              ),
+            ),
             Text(
               sender,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

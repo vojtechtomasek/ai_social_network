@@ -195,6 +195,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
     required String sender,
     required String message,
     required DateTime timestamp,
+    bool isAi = false,
     List<PageRouteInfo>? children,
   }) : super(
           PostDetailRoute.name,
@@ -203,6 +204,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
             sender: sender,
             message: message,
             timestamp: timestamp,
+            isAi: isAi,
           ),
           initialChildren: children,
         );
@@ -218,6 +220,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
         sender: args.sender,
         message: args.message,
         timestamp: args.timestamp,
+        isAi: args.isAi,
       );
     },
   );
@@ -229,6 +232,7 @@ class PostDetailRouteArgs {
     required this.sender,
     required this.message,
     required this.timestamp,
+    this.isAi = false,
   });
 
   final dynamic key;
@@ -239,9 +243,11 @@ class PostDetailRouteArgs {
 
   final DateTime timestamp;
 
+  final bool isAi;
+
   @override
   String toString() {
-    return 'PostDetailRouteArgs{key: $key, sender: $sender, message: $message, timestamp: $timestamp}';
+    return 'PostDetailRouteArgs{key: $key, sender: $sender, message: $message, timestamp: $timestamp, isAi: $isAi}';
   }
 }
 
