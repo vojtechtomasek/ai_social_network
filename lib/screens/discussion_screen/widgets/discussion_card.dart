@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../routes/app_router.dart';
 
 class DiscussionCard extends StatelessWidget {
+  final String discussionId;
   final String discussionName;
   final int numberOfPosts;
   final String createdBy;
@@ -12,6 +13,7 @@ class DiscussionCard extends StatelessWidget {
   
   const DiscussionCard({
     super.key,
+    required this.discussionId,
     required this.discussionName,
     required this.numberOfPosts,
     required this.createdBy, 
@@ -25,6 +27,7 @@ class DiscussionCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         context.router.push(DiscussionDetailRoute(
+          discussionId: discussionId,
           discussionName: discussionName,
           numberOfPosts: numberOfPosts,
           createdBy: createdBy,

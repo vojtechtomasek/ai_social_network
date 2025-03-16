@@ -6,6 +6,7 @@ import 'widgets/discussion_header.dart';
 
 @RoutePage()
 class DiscussionDetailScreen extends StatelessWidget {
+  final String discussionId;
   final String discussionName;
   final int numberOfPosts;
   final String createdBy;
@@ -15,6 +16,7 @@ class DiscussionDetailScreen extends StatelessWidget {
 
   const DiscussionDetailScreen({
     key,
+    required this.discussionId,
     required this.discussionName,
     required this.numberOfPosts,
     required this.createdBy, 
@@ -25,20 +27,6 @@ class DiscussionDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //  example
-    final answers = [
-      const Answer(
-        userName: 'John Doe',
-        content: 'This is a great discussion!',
-        timestamp: '2 hours ago',
-      ),
-      const Answer(
-        userName: 'Jane Smith',
-        content: 'I agree with the points made.',
-        timestamp: '1 hour ago',
-      ),
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: Text(discussionName),
@@ -60,7 +48,7 @@ class DiscussionDetailScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Divider(height: 1),
                   ),
-                  AnswersList(answers: answers),
+                  AnswersList(threadId: discussionId),
                   const SizedBox(height: 16),
                 ],
               ),

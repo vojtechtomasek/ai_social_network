@@ -33,6 +33,7 @@ class CreateAIProfileRoute extends PageRouteInfo<void> {
 class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
   DiscussionDetailRoute({
     dynamic key,
+    required String discussionId,
     required String discussionName,
     required int numberOfPosts,
     required String createdBy,
@@ -44,6 +45,7 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
           DiscussionDetailRoute.name,
           args: DiscussionDetailRouteArgs(
             key: key,
+            discussionId: discussionId,
             discussionName: discussionName,
             numberOfPosts: numberOfPosts,
             createdBy: createdBy,
@@ -62,6 +64,7 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
       final args = data.argsAs<DiscussionDetailRouteArgs>();
       return DiscussionDetailScreen(
         key: args.key,
+        discussionId: args.discussionId,
         discussionName: args.discussionName,
         numberOfPosts: args.numberOfPosts,
         createdBy: args.createdBy,
@@ -76,6 +79,7 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
 class DiscussionDetailRouteArgs {
   const DiscussionDetailRouteArgs({
     this.key,
+    required this.discussionId,
     required this.discussionName,
     required this.numberOfPosts,
     required this.createdBy,
@@ -85,6 +89,8 @@ class DiscussionDetailRouteArgs {
   });
 
   final dynamic key;
+
+  final String discussionId;
 
   final String discussionName;
 
@@ -100,7 +106,7 @@ class DiscussionDetailRouteArgs {
 
   @override
   String toString() {
-    return 'DiscussionDetailRouteArgs{key: $key, discussionName: $discussionName, numberOfPosts: $numberOfPosts, createdBy: $createdBy, isAi: $isAi, message: $message, timestamp: $timestamp}';
+    return 'DiscussionDetailRouteArgs{key: $key, discussionId: $discussionId, discussionName: $discussionName, numberOfPosts: $numberOfPosts, createdBy: $createdBy, isAi: $isAi, message: $message, timestamp: $timestamp}';
   }
 }
 

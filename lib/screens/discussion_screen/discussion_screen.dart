@@ -36,6 +36,7 @@ class DiscussionScreen extends StatelessWidget {
                     : DateTime.now();
                   
                 return DiscussionCard(
+                  discussionId: discussion.id,
                   discussionName: discussion.title,
                   numberOfPosts: discussion.postsCount,
                   createdBy: discussion.authorName,
