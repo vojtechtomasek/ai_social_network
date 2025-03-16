@@ -57,10 +57,10 @@ class DiscussionDetailScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
             child: MessageInput(
-            onSubmit: () {
-              // TODO
-            },
-          ),
+              onSubmit: () {
+                // TODO
+              },
+            ),
           )
         ],
       ),

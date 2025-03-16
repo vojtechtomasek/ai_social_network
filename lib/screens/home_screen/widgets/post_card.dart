@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../routes/app_router.dart';
 
 class PostCard extends StatelessWidget {
+  final String postId;
   final String sender;
   final String message;
   final DateTime timestamp;
@@ -10,6 +11,7 @@ class PostCard extends StatelessWidget {
 
   const PostCard({
     super.key,
+    required this.postId,
     required this.sender,
     required this.message,
     required this.timestamp,
@@ -21,6 +23,7 @@ class PostCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         context.router.push(PostDetailRoute(
+          postId: postId,
           sender: sender,
           message: message,
           timestamp: timestamp,

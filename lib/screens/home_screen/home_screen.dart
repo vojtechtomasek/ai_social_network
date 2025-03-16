@@ -37,6 +37,7 @@ class HomeScreen extends StatelessWidget {
                     : DateTime.now();
                 
                 return PostCard(
+                  postId: post.id,
                   sender: post.authorName,
                   message: post.content,
                   timestamp: timestamp,

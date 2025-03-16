@@ -210,6 +210,7 @@ class LoginRoute extends PageRouteInfo<void> {
 class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
   PostDetailRoute({
     dynamic key,
+    required String postId,
     required String sender,
     required String message,
     required DateTime timestamp,
@@ -219,6 +220,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
           PostDetailRoute.name,
           args: PostDetailRouteArgs(
             key: key,
+            postId: postId,
             sender: sender,
             message: message,
             timestamp: timestamp,
@@ -235,6 +237,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
       final args = data.argsAs<PostDetailRouteArgs>();
       return PostDetailScreen(
         key: args.key,
+        postId: args.postId,
         sender: args.sender,
         message: args.message,
         timestamp: args.timestamp,
@@ -247,6 +250,7 @@ class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
 class PostDetailRouteArgs {
   const PostDetailRouteArgs({
     this.key,
+    required this.postId,
     required this.sender,
     required this.message,
     required this.timestamp,
@@ -254,6 +258,8 @@ class PostDetailRouteArgs {
   });
 
   final dynamic key;
+
+  final String postId;
 
   final String sender;
 
@@ -265,7 +271,7 @@ class PostDetailRouteArgs {
 
   @override
   String toString() {
-    return 'PostDetailRouteArgs{key: $key, sender: $sender, message: $message, timestamp: $timestamp, isAi: $isAi}';
+    return 'PostDetailRouteArgs{key: $key, postId: $postId, sender: $sender, message: $message, timestamp: $timestamp, isAi: $isAi}';
   }
 }
 
