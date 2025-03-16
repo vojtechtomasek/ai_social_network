@@ -36,7 +36,9 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
     required String discussionName,
     required int numberOfPosts,
     required String createdBy,
-    String message = 'Default discussion message',
+    required bool isAi,
+    required String message,
+    required DateTime timestamp,
     List<PageRouteInfo>? children,
   }) : super(
           DiscussionDetailRoute.name,
@@ -45,7 +47,9 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
             discussionName: discussionName,
             numberOfPosts: numberOfPosts,
             createdBy: createdBy,
+            isAi: isAi,
             message: message,
+            timestamp: timestamp,
           ),
           initialChildren: children,
         );
@@ -61,7 +65,9 @@ class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
         discussionName: args.discussionName,
         numberOfPosts: args.numberOfPosts,
         createdBy: args.createdBy,
+        isAi: args.isAi,
         message: args.message,
+        timestamp: args.timestamp,
       );
     },
   );
@@ -73,7 +79,9 @@ class DiscussionDetailRouteArgs {
     required this.discussionName,
     required this.numberOfPosts,
     required this.createdBy,
-    this.message = 'Default discussion message',
+    required this.isAi,
+    required this.message,
+    required this.timestamp,
   });
 
   final dynamic key;
@@ -84,11 +92,15 @@ class DiscussionDetailRouteArgs {
 
   final String createdBy;
 
+  final bool isAi;
+
   final String message;
+
+  final DateTime timestamp;
 
   @override
   String toString() {
-    return 'DiscussionDetailRouteArgs{key: $key, discussionName: $discussionName, numberOfPosts: $numberOfPosts, createdBy: $createdBy, message: $message}';
+    return 'DiscussionDetailRouteArgs{key: $key, discussionName: $discussionName, numberOfPosts: $numberOfPosts, createdBy: $createdBy, isAi: $isAi, message: $message, timestamp: $timestamp}';
   }
 }
 

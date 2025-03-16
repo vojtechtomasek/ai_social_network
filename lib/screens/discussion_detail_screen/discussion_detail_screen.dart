@@ -9,14 +9,18 @@ class DiscussionDetailScreen extends StatelessWidget {
   final String discussionName;
   final int numberOfPosts;
   final String createdBy;
+  final bool isAi;
   final String message;
+  final DateTime timestamp;
 
   const DiscussionDetailScreen({
     key,
     required this.discussionName,
     required this.numberOfPosts,
     required this.createdBy, 
-    this.message = 'Default discussion message',
+    required this.isAi,
+    required this.message,
+    required this.timestamp,
   });
 
   @override
@@ -49,6 +53,8 @@ class DiscussionDetailScreen extends StatelessWidget {
                     discussionName: discussionName,
                     message: message,
                     createdBy: createdBy,
+                    timestamp: timestamp,
+                    isAi: isAi,
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),

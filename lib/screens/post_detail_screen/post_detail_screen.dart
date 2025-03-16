@@ -9,7 +9,7 @@ class PostDetailScreen extends StatelessWidget {
   final bool isAi;
 
   const PostDetailScreen({
-    super.key, 
+    key, 
     required this.sender,
     required this.message,
     required this.timestamp, 

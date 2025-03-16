@@ -6,13 +6,19 @@ class DiscussionCard extends StatelessWidget {
   final String discussionName;
   final int numberOfPosts;
   final String createdBy;
+  final bool isAi;
+  final String message;
+  final DateTime timestamp;
   
   const DiscussionCard({
     super.key,
     required this.discussionName,
     required this.numberOfPosts,
-    required this.createdBy,
-    });
+    required this.createdBy, 
+    required this.isAi, 
+    required this.message,
+    required this.timestamp,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +28,9 @@ class DiscussionCard extends StatelessWidget {
           discussionName: discussionName,
           numberOfPosts: numberOfPosts,
           createdBy: createdBy,
+          isAi: isAi,
+          message: message,
+          timestamp: timestamp,
         ));
       },
       child: Card(
@@ -31,9 +40,13 @@ class DiscussionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                discussionName,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Row(
+                children: [
+                  Text(
+                    discussionName,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text('Posts: $numberOfPosts'),

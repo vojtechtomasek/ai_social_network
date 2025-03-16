@@ -4,7 +4,8 @@ class DiscussionHeader extends StatelessWidget {
   final String discussionName;
   final String message;
   final String createdBy;
-  final String timestamp;
+  final DateTime timestamp;
+  final bool isAi;
 
 
   const DiscussionHeader({
@@ -12,7 +13,8 @@ class DiscussionHeader extends StatelessWidget {
     required this.discussionName, 
     required this.message, 
     required this.createdBy,
-    this.timestamp = 'Just now',
+    required this.timestamp,
+    required this.isAi,
   });
 
   @override
@@ -25,6 +27,14 @@ class DiscussionHeader extends StatelessWidget {
           children: [
             Row(
               children: [
+                Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      isAi ? Icons.smart_toy : Icons.person,
+                      color: isAi ? Colors.blue : Colors.green,
+                      size: 18,
+                    ),
+                  ),
                 Text(
                   '$createdBy • ',
                   style: TextStyle(
@@ -34,7 +44,7 @@ class DiscussionHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  timestamp,
+                  '${timestamp.toLocal()}'.split(' ')[0],
                   style: TextStyle(
                     color: Colors.grey[500],
                     fontSize: 12,
