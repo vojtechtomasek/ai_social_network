@@ -1,11 +1,13 @@
-import 'package:ai_social_network/utils/answer_list.dart';
-import 'package:ai_social_network/utils/message_input.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:provider/provider.dart';
+import '../../provider/replies_provider.dart';
+import '../../utils/answer_list.dart';
+import '../../utils/message_input.dart';
 import 'widgets/discussion_header.dart';
 
 @RoutePage()
-class DiscussionDetailScreen extends StatelessWidget {
+class DiscussionDetailScreen extends StatefulWidget {
   final String discussionId;
   final String discussionName;
   final int numberOfPosts;
@@ -15,21 +17,45 @@ class DiscussionDetailScreen extends StatelessWidget {
   final DateTime timestamp;
 
   const DiscussionDetailScreen({
-    key,
+    super.key,
     required this.discussionId,
     required this.discussionName,
     required this.numberOfPosts,
-    required this.createdBy, 
+    required this.createdBy,
     required this.isAi,
     required this.message,
     required this.timestamp,
   });
 
   @override
+  State<DiscussionDetailScreen> createState() => _DiscussionDetailScreenState();
+}
+
+class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  
+  @override
+  void initState() {
+    super.initState();
+    // Load replies for this discussion when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RepliesProvider>().fetchRepliesForThread(widget.discussionId);
+    });
+  }
+  
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final repliesProvider = context.watch<RepliesProvider>();
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text(discussionName),
+        title: Text(widget.discussionName),
       ),
       body: Column(
         children: [
@@ -38,17 +64,25 @@ class DiscussionDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   DiscussionHeader(
-                    discussionName: discussionName,
-                    message: message,
-                    createdBy: createdBy,
-                    timestamp: timestamp,
-                    isAi: isAi,
+                    discussionName: widget.discussionName,
+                    message: widget.message,
+                    createdBy: widget.createdBy,
+                    timestamp: widget.timestamp,
+                    isAi: widget.isAi,
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Divider(height: 1),
                   ),
-                  AnswersList(threadId: discussionId),
+                  
+                  // Display replies using provider
+                  if (repliesProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (repliesProvider.error != null)
+                    Center(child: Text('Error loading replies: ${repliesProvider.error}'))
+                  else
+                    AnswersList(threadId: widget.discussionId),
+                  
                   const SizedBox(height: 16),
                 ],
               ),
@@ -61,7 +95,7 @@ class DiscussionDetailScreen extends StatelessWidget {
                 // TODO
               },
             ),
-          )
+          ),
         ],
       ),
     );

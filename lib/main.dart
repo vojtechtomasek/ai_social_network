@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'provider/discussions_provider.dart';
+import 'provider/post_provider.dart';
+import 'provider/replies_provider.dart';
 import 'routes/app_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,10 +31,17 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appRouter = AppRouter();
-
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: appRouter.config(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PostsProvider()),
+        ChangeNotifierProvider(create: (_) => DiscussionsProvider()),
+        ChangeNotifierProvider(create: (_) => RepliesProvider()),
+    ],
+    child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: appRouter.config(),
+      ),
     );
+
   }
 }
