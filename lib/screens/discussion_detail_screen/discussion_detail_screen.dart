@@ -37,7 +37,6 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Load replies for this discussion when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RepliesProvider>().fetchRepliesForThread(widget.discussionId);
     });
@@ -75,7 +74,6 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     child: Divider(height: 1),
                   ),
                   
-                  // Display replies using provider
                   if (repliesProvider.isLoading)
                     const Center(child: CircularProgressIndicator())
                   else if (repliesProvider.error != null)
@@ -91,8 +89,9 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
             child: MessageInput(
+              controller: _messageController,
               onSubmit: () {
-                // TODO
+                _submitReply();
               },
             ),
           ),
@@ -100,4 +99,15 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
       ),
     );
   }
+  void _submitReply() {
+    final content = _messageController.text.trim();
+    if (content.isEmpty) return;
+
+    context.read<RepliesProvider>().createReply(
+      content: content,
+      threadId: widget.discussionId,
+    );
+
+    _messageController.clear();
+  } 
 }

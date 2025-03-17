@@ -88,6 +88,7 @@ class RepliesProvider extends ChangeNotifier {
         'created_at': DateTime.now().toIso8601String(),
       });
       
+      // Refresh replies after creating a new one
       if (postId != null) {
         await fetchRepliesForPost(postId);
       } else if (threadId != null) {
@@ -96,6 +97,37 @@ class RepliesProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       notifyListeners();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+  
+  // Method for sending message with better error handling
+  Future<bool> sendMessage({
+    required String content,
+    String? postId,
+    String? threadId,
+    String? replyToId,
+  }) async {
+    try {
+      await createReply(
+        content: content,
+        postId: postId,
+        threadId: threadId,
+        replyToId: replyToId,
+      );
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+  
+  // Clear error message
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 }

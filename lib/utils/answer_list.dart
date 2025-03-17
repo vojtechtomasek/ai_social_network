@@ -127,9 +127,11 @@ class AnswerCard extends StatelessWidget {
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
-      final difference = now.difference(date);
-      
-      if (difference.inMinutes < 60) {
+      final difference = now.difference(date).abs();
+
+      if (difference.inSeconds < 5) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
         return '${difference.inMinutes} min ago';
       } else if (difference.inHours < 24) {
         return '${difference.inHours} hours ago';
