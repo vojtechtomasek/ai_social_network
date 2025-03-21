@@ -125,11 +125,12 @@ class AnswerCard extends StatelessWidget {
   
   String _formatTimestamp(String dateString) {
     try {
-      final date = DateTime.parse(dateString);
+      final date = DateTime.parse(dateString).toLocal();
       final now = DateTime.now();
-      final difference = now.difference(date).abs();
 
-      if (difference.inSeconds < 5) {
+      final difference = now.difference(date);
+
+      if (difference.isNegative || difference.inSeconds < 5) {
         return 'Just now';
       } else if (difference.inMinutes < 60) {
         return '${difference.inMinutes} min ago';
