@@ -17,7 +17,7 @@ class DiscussionDetailScreen extends StatefulWidget {
   final DateTime timestamp;
 
   const DiscussionDetailScreen({
-    super.key,
+    key,
     required this.discussionId,
     required this.discussionName,
     required this.numberOfPosts,

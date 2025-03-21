@@ -88,7 +88,6 @@ class RepliesProvider extends ChangeNotifier {
         'created_at': DateTime.now().toIso8601String(),
       });
       
-      // Refresh replies after creating a new one
       if (postId != null) {
         await fetchRepliesForPost(postId);
       } else if (threadId != null) {
@@ -103,7 +102,6 @@ class RepliesProvider extends ChangeNotifier {
     }
   }
   
-  // Method for sending message with better error handling
   Future<bool> sendMessage({
     required String content,
     String? postId,
@@ -125,7 +123,6 @@ class RepliesProvider extends ChangeNotifier {
     }
   }
   
-  // Clear error message
   void clearError() {
     _error = null;
     notifyListeners();

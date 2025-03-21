@@ -14,7 +14,7 @@ class PostDetailScreen extends StatefulWidget {
   final bool isAi;
 
   const PostDetailScreen({
-    super.key,
+    key,
     required this.postId,
     required this.sender,
     required this.message,

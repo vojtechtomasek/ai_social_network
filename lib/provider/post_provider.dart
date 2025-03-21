@@ -32,14 +32,14 @@ class PostsProvider extends ChangeNotifier {
     }
   }
   
-  Future<void> createPost(String content) async {
-    if (_isLoading) return;
+  Future<bool> createPost(String content) async {
+    if (_isLoading) return false;
     
     final user = _supabase.auth.currentUser;
     if (user == null) {
       _error = 'User not authenticated';
       notifyListeners();
-      return;
+      return false;
     }
     
     _isLoading = true;
@@ -53,8 +53,13 @@ class PostsProvider extends ChangeNotifier {
       });
       
       await fetchPosts();
+      return true;
     } catch (e) {
       _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

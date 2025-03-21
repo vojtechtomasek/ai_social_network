@@ -64,7 +64,7 @@ class _DiscussionScreenState extends State<DiscussionScreen> {
           }
         },
       ),
-      bottomNavigationBar: const BottomNavWidget(currentIndex: 2),
+      bottomNavigationBar: const BottomNavWidget(currentIndex: 3),
     );
   }
 }

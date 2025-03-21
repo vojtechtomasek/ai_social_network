@@ -29,6 +29,25 @@ class CreateAIProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [CreateContentScreen]
+class CreateContentRoute extends PageRouteInfo<void> {
+  const CreateContentRoute({List<PageRouteInfo>? children})
+      : super(
+          CreateContentRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'CreateContentRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const CreateContentScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [DiscussionDetailScreen]
 class DiscussionDetailRoute extends PageRouteInfo<DiscussionDetailRouteArgs> {
   DiscussionDetailRoute({

@@ -14,6 +14,7 @@ class BottomNavWidget extends StatelessWidget {
     final routes = [
       const HomeRoute(),
       const CreateAIProfileRoute(),
+      const CreateContentRoute(),
       const DiscussionRoute(),
       const ProfileRoute(),
     ];
@@ -33,6 +34,7 @@ class BottomNavWidget extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.create), label: 'Create AI Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Create Content'),
         BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Discussion'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],

@@ -32,21 +32,21 @@ class DiscussionsProvider extends ChangeNotifier {
     }
   }
   
-  Future<void> createDiscussion(String title, String content) async {
-    if (_isLoading) return;
+  Future<bool> createDiscussion(String title, String content) async {
+    if (_isLoading) return false;
     
     final user = _supabase.auth.currentUser;
     if (user == null) {
       _error = 'User not authenticated';
       notifyListeners();
-      return;
+      return false;
     }
     
     _isLoading = true;
     notifyListeners();
     
     try {
-      await _supabase.from('discussions').insert({
+      await _supabase.from('threads').insert({
         'title': title,
         'content': content,
         'author_user_id': user.id,
@@ -54,8 +54,13 @@ class DiscussionsProvider extends ChangeNotifier {
       });
       
       await fetchDiscussions();
+      return true;
     } catch (e) {
       _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

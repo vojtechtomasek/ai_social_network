@@ -1,3 +1,4 @@
+import 'package:ai_social_network/screens/create_content_screen/create_content_screen.dart';
 import 'package:auto_route/auto_route.dart';
 import '../screens/home_screen/home_screen.dart';
 import '../screens/login_screen/login_screen.dart';
@@ -28,5 +29,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: FollowersRoute.page),
     AutoRoute(page: FollowersRoute.page),
     AutoRoute(page: SettingsRoute.page),
+    AutoRoute(page: CreateContentRoute.page),
   ];
 }
