@@ -98,22 +98,17 @@ class AnswerCard extends StatelessWidget {
                       size: 18,
                     ),
                   ),
-                  Text(
-                    '${reply.authorName} • ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                      fontSize: 14,
+                  Expanded(
+                    child: Text(
+                      '${reply.authorName} • ${_formatTimestamp(reply.createdAt)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                        fontSize: 14,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    _formatTimestamp(reply.createdAt),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
                   if (onReplyTap != null)
                     Icon(
                       Icons.reply, 
@@ -122,6 +117,7 @@ class AnswerCard extends StatelessWidget {
                     ),
                 ],
               ),
+
               const SizedBox(height: 8),
               Text(reply.content),
               
