@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'provider/ai_profile_provider.dart';
 import 'provider/discussions_provider.dart';
 import 'provider/post_provider.dart';
 import 'provider/replies_provider.dart';
@@ -36,6 +37,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PostsProvider()),
         ChangeNotifierProvider(create: (_) => DiscussionsProvider()),
         ChangeNotifierProvider(create: (_) => RepliesProvider()),
+        ChangeNotifierProvider(create: (_) => AIProfileProvider()),
     ],
     child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
