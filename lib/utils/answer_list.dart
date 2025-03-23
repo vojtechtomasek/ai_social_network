@@ -5,11 +5,13 @@ import '../services/replies_service.dart';
 class AnswersList extends StatefulWidget {
   final String? threadId;
   final String? postId;
+  final Function(RepliesModel)? onReplyTap;
 
   const AnswersList({
     super.key,
     this.threadId,
     this.postId,
+    this.onReplyTap,
   }) : assert(threadId != null || postId != null, 'Either threadId or postId must be provided');
 
   @override
@@ -53,7 +55,10 @@ class _AnswersListState extends State<AnswersList> {
           itemCount: replies.length,
           itemBuilder: (context, index) {
             final reply = replies[index];
-            return AnswerCard(reply: reply);
+            return AnswerCard(
+              reply: reply,
+              onReplyTap: widget.onReplyTap,
+            );
           },
         );
       },
@@ -63,61 +68,77 @@ class _AnswersListState extends State<AnswersList> {
 
 class AnswerCard extends StatelessWidget {
   final RepliesModel reply;
+  final Function(RepliesModel)? onReplyTap;
   
   const AnswerCard({
     super.key,
     required this.reply,
+    this.onReplyTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(
-                    reply.isAiAuthor ? Icons.smart_toy : Icons.person,
-                    color: reply.isAiAuthor ? Colors.blue : Colors.green,
-                    size: 18,
+      child: InkWell(
+        onTap: onReplyTap != null ? () => onReplyTap!(reply) : null,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Icon(
+                      reply.isAiAuthor ? Icons.smart_toy : Icons.person,
+                      color: reply.isAiAuthor ? Colors.blue : Colors.green,
+                      size: 18,
+                    ),
                   ),
-                ),
-                Text(
-                  '${reply.authorName} • ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                    fontSize: 14,
+                  Text(
+                    '${reply.authorName} • ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Text(
-                  _formatTimestamp(reply.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12,
+                  Text(
+                    _formatTimestamp(reply.createdAt),
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(reply.content),
-            
-            if (reply.childReplies.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0, top: 8.0),
-                child: Column(
-                  children: reply.childReplies
-                      .map((childReply) => AnswerCard(reply: childReply))
-                      .toList(),
-                ),
+                  const Spacer(),
+                  if (onReplyTap != null)
+                    Icon(
+                      Icons.reply, 
+                      size: 14,
+                      color: Colors.grey[400],
+                    ),
+                ],
               ),
-          ],
+              const SizedBox(height: 8),
+              Text(reply.content),
+              
+              if (reply.childReplies.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 24.0, top: 16.0),
+                  child: Column(
+                    children: reply.childReplies
+                        .map((childReply) => AnswerCard(
+                              reply: childReply,
+                              onReplyTap: onReplyTap,
+                            ))
+                        .toList(),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -145,16 +166,4 @@ class AnswerCard extends StatelessWidget {
       return dateString;
     }
   }
-}
-
-class Answer {
-  final String userName;
-  final String content;
-  final String timestamp;
-
-  const Answer({
-    required this.userName,
-    required this.content,
-    required this.timestamp,
-  });
 }

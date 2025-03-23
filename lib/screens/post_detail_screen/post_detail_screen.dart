@@ -1,3 +1,4 @@
+import 'package:ai_social_network/models/replies_model.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
+  RepliesModel? _replyingTo;
   
   @override
   void initState() {
@@ -92,7 +94,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   else if (repliesProvider.error != null)
                     Center(child: Text('Error loading replies: ${repliesProvider.error}'))
                   else
-                    AnswersList(postId: widget.postId),
+                    AnswersList(
+                      postId: widget.postId, 
+                      onReplyTap: (reply) {
+                        setState(() {
+                          _replyingTo = reply;
+                        });
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        });
+                      }
+                    ),
                 ],
               ),
             ),
@@ -101,6 +114,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
             child: MessageInput(
               controller: _messageController,
+              replyingTo: _replyingTo,
+              onCancelReply: () {
+                setState(() {
+                  _replyingTo = null;
+                });
+              },
               onSubmit: () {
                 _submitReply();
               },
@@ -118,8 +137,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     context.read<RepliesProvider>().createReply(
       content: content,
       postId: widget.postId,
+      replyToId: _replyingTo?.id,
     );
     
     _messageController.clear();
+
+    setState(() {
+      _replyingTo = null;
+    });
   }
 }

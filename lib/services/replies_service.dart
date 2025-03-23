@@ -16,14 +16,12 @@ class ReplyService {
     return _fetchReplies(replyToId: replyId);
   }
 
-  // Internal method to fetch replies based on parameters
   Future<List<RepliesModel>> _fetchReplies({
     String? postId,
     String? threadId,
     String? replyToId,
   }) async {
     try {
-      // Create base query
       final query = _supabase.from('replies').select('''
         *,
         users(*),
