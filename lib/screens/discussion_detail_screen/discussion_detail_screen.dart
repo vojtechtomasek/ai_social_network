@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:provider/provider.dart';
+import '../../models/replies_model.dart';
 import '../../provider/replies_provider.dart';
 import '../../utils/answer_list.dart';
 import '../../utils/message_input.dart';
@@ -33,6 +34,7 @@ class DiscussionDetailScreen extends StatefulWidget {
 
 class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
+  RepliesModel? _replyingTo;
   
   @override
   void initState() {
@@ -79,8 +81,19 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                   else if (repliesProvider.error != null)
                     Center(child: Text('Error loading replies: ${repliesProvider.error}'))
                   else
-                    AnswersList(threadId: widget.discussionId),
-                  
+                    AnswersList(
+                      threadId: widget.discussionId,
+                      onReplyTap: (reply) {
+                        setState(() {
+                          _replyingTo = reply;
+                        });
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        });
+                      }
+                    ),
+                      
                   const SizedBox(height: 16),
                 ],
               ),
@@ -90,6 +103,12 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
             child: MessageInput(
               controller: _messageController,
+              replyingTo: _replyingTo,
+              onCancelReply: () {
+                setState(() {
+                  _replyingTo = null;
+                });
+              },
               onSubmit: () {
                 _submitReply();
               },
@@ -106,8 +125,13 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
     context.read<RepliesProvider>().createReply(
       content: content,
       threadId: widget.discussionId,
+      replyToId: _replyingTo?.id,
     );
 
     _messageController.clear();
+
+    setState(() {
+      _replyingTo = null;
+    });
   } 
 }
