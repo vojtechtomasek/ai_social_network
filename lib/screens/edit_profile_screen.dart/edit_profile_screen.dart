@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import '../../services/user_profile_service.dart';
+import 'package:provider/provider.dart';
+import '../../provider/profile_provider.dart';
+import 'widgets/form_field_with_label.dart';
 
 @RoutePage()
 class EditProfileScreen extends StatefulWidget {
@@ -16,14 +18,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _lastNameController = TextEditingController();
   final _userNameController = TextEditingController();
   final _bioController = TextEditingController();
-  final _userProfileService = UserProfileService();
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool _localLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _populateFieldsFromProvider();
   }
 
   @override
@@ -35,28 +35,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  void _populateFieldsFromProvider() {
+    final profileProvider = context.read<ProfileProvider>();
     
-    try {
-      final userData = await _userProfileService.loadUserData();
-      
+    if (profileProvider.userData != null) {
       setState(() {
-        _firstNameController.text = userData['first_name'] ?? '';
-        _lastNameController.text = userData['last_name'] ?? '';
-        _userNameController.text = userData['user_name'] ?? '';
-        _bioController.text = userData['bio'] ?? '';
+        _firstNameController.text = profileProvider.userData!['first_name'] ?? '';
+        _lastNameController.text = profileProvider.userData!['last_name'] ?? '';
+        _userNameController.text = profileProvider.userData!['user_name'] ?? '';
+        _bioController.text = profileProvider.userData!['bio'] ?? '';
       });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
+    } else {
+      profileProvider.loadUserData().then((_) {
+        if (mounted && profileProvider.userData != null) {
+          setState(() {
+            _firstNameController.text = profileProvider.userData!['first_name'] ?? '';
+            _lastNameController.text = profileProvider.userData!['last_name'] ?? '';
+            _userNameController.text = profileProvider.userData!['user_name'] ?? '';
+            _bioController.text = profileProvider.userData!['bio'] ?? '';
+          });
+        }
       });
     }
   }
@@ -66,209 +64,160 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() => _localLoading = true);
 
-    try {
-      await _userProfileService.updateProfile(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        userName: _userNameController.text.trim(),
-        bio: _bioController.text.trim(),
-      );
+    final profileProvider = context.read<ProfileProvider>();
+    
+    final success = await profileProvider.updateProfile(
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      userName: _userNameController.text.trim(),
+      bio: _bioController.text.trim(),
+    );
 
-      if (mounted) {
+    if (mounted) {
+      setState(() => _localLoading = false);
+      
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
         );
         context.router.back();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating profile: ${profileProvider.error}')),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final profileProvider = context.watch<ProfileProvider>();
+    final isLoading = _localLoading || profileProvider.isLoading;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
       ),
-      body: _isLoading
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Error: $_errorMessage',
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Change profile picture not implemented yet')),
+                              );
+                            },
+                            child: const CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Colors.blue,
+                              child: Icon(Icons.person, size: 50, color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadUserData,
-                        child: const Text('Try Again'),
-                      ),
-                    ],
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Column(
-                            children: [
-                                GestureDetector(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Profile photo upload not implemented yet')),
-                                  );
-                                },
-                                child: const CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.blue,
-                                  child: Icon(Icons.person, size: 50, color: Colors.white),
-                                ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        const Text(
-                          'First Name',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _firstNameController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter your first name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'First name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        const Text(
-                          'Last Name',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _lastNameController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter your last name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          textCapitalization: TextCapitalization.words,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Last name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        const Text(
-                          'Username',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _userNameController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter your username',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Username is required';
-                            }
-                            if (value.contains(' ')) {
-                              return 'Username cannot contain spaces';
-                            }
-                            return null;
-                          },
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        const Text(
-                          'Bio',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _bioController,
-                          decoration: InputDecoration(
-                            hintText: 'Tell us about yourself',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          maxLines: 3,
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _updateProfile,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: const Text(
-                              'SAVE CHANGES',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    FormFieldWithLabel(
+                      label: 'First Name', 
+                      hintText: 'Enter your first name', 
+                      controller: _firstNameController, 
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'First name is required';
+                        }
+                        return null;
+                      }
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    FormFieldWithLabel(
+                      label: 'Last Name', 
+                      hintText: 'Enter your last name', 
+                      controller: _lastNameController,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Last name is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    FormFieldWithLabel(
+                      label: 'Username', 
+                      hintText: 'Enter your username', 
+                      controller: _userNameController,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Username is required';
+                        }
+                        if (value.contains(' ')) {
+                          return 'Username cannot contain spaces';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+                    
+                    FormFieldWithLabel(
+                      label: 'Bio', 
+                      hintText: 'Tell us about yourself', 
+                      controller: _bioController,
+                      maxLines: 3
+                    ),
+
+                    const SizedBox(height: 24),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _updateProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'SAVE CHANGES',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 }

@@ -47,7 +47,6 @@ class ProfileProvider extends ChangeNotifier {
         bio: bio,
       );
       
-      // Refresh the user data after update
       await loadUserData();
       return true;
     } catch (e) {

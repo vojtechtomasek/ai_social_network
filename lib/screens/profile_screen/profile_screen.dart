@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import '../../provider/profile_provider.dart';
 import '../../routes/app_router.dart';
-import '../../services/user_profile_service.dart';
 import '../../utils/bottom_nav_bar_widget.dart';
 import 'widgets/settings_menu.dart';
 
@@ -15,37 +15,16 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _userProfileService = UserProfileService();
-  Map<String, dynamic>? _userData;
-  bool _isLoading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final userData = await _userProfileService.loadUserData();
-      setState(() {
-        _userData = userData;
-        _error = null;
-      });
-    } catch (error) {
-      setState(() {
-        _error = error.toString();
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().loadUserData();
+    });
   }
 
   void _signOut(BuildContext context) async {
-    await Supabase.instance.client.auth.signOut();
+    await context.read<ProfileProvider>().signOut();
     context.router.replace(const SignUpRoute());
   }
 
@@ -61,7 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
+    final profileProvider = context.watch<ProfileProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -72,10 +52,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: profileProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text('Error: $_error'))
+          : profileProvider.error != null
+              ? Center(child: Text('Error: ${profileProvider.error}'))
               : SingleChildScrollView(
                 child: Column(
                   children: [
@@ -93,15 +73,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 16),
 
                           Text(
-                            _userData?['user_name'] ?? 'No username available',
+                            profileProvider.userData?['user_name'] ?? 'No username available',
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                          Text(
-                            _userData?['bio'] ?? null,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
+                          if (profileProvider.userData?['bio'] != null && 
+                              profileProvider.userData!['bio'].toString().isNotEmpty)
+                            Text(
+                              profileProvider.userData!['bio'],
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
