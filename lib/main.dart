@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'provider/ai_profile_provider.dart';
 import 'provider/discussions_provider.dart';
 import 'provider/post_provider.dart';
+import 'provider/profile_provider.dart';
 import 'provider/replies_provider.dart';
 import 'routes/app_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -38,6 +39,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DiscussionsProvider()),
         ChangeNotifierProvider(create: (_) => RepliesProvider()),
         ChangeNotifierProvider(create: (_) => AIProfileProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
     ],
     child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

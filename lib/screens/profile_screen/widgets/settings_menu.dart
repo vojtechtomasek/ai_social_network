@@ -31,9 +31,7 @@ class SettingsMenu extends StatelessWidget {
             title: 'Edit Profile',
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edit Profile not implemented yet')),
-              );
+              context.router.push(const EditProfileRoute());
             },
           ),
           SettingsMenuItem(
