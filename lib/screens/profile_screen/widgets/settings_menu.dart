@@ -39,7 +39,7 @@ class SettingsMenu extends StatelessWidget {
             title: 'Manage AI Profiles',
             onTap: () {
               Navigator.pop(context);
-              context.router.push(const CreateAIProfileRoute());
+              context.router.push(const ManageAIProfilesRoute());
             },
           ),
           SettingsMenuItem(

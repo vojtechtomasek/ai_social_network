@@ -244,6 +244,25 @@ class LoginRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ManageAIProfilesScreen]
+class ManageAIProfilesRoute extends PageRouteInfo<void> {
+  const ManageAIProfilesRoute({List<PageRouteInfo>? children})
+      : super(
+          ManageAIProfilesRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ManageAIProfilesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ManageAIProfilesScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [PostDetailScreen]
 class PostDetailRoute extends PageRouteInfo<PostDetailRouteArgs> {
   PostDetailRoute({
@@ -328,25 +347,6 @@ class ProfileRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const ProfileScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [SettingsScreen]
-class SettingsRoute extends PageRouteInfo<void> {
-  const SettingsRoute({List<PageRouteInfo>? children})
-      : super(
-          SettingsRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'SettingsRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const SettingsScreen();
     },
   );
 }

@@ -64,4 +64,29 @@ class AIProfileProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> deleteProfile(String profileId) async {
+    if (_isLoading) return false;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _supabase
+          .from('ai_profiles')
+          .delete()
+          .eq('id', profileId);
+
+      _profiles.removeWhere((profile) => profile.id == profileId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

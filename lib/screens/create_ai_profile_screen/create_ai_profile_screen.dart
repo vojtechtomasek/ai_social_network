@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import '../../services/ai_profile_submission_service.dart';
+import '../../services/ai_profile_service.dart';
 import '../../utils/bottom_nav_bar_widget.dart';
 import 'widgets/section_title.dart';
 import 'widgets/styled_text_field.dart';
@@ -157,7 +157,7 @@ class _CreateAIProfileScreenState extends State<CreateAIProfileScreen> {
   }
 
   Future<void> _submitAIProfile() async {
-    await ProfileSubmissionService.submitAIProfile(
+    await AiProfileService.submitAIProfile(
       context: context,
       formKey: _formKey,
       nameController: _nameController,
