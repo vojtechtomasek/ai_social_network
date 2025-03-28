@@ -149,6 +149,52 @@ class DiscussionRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [EditAIProfileScreen]
+class EditAIProfileRoute extends PageRouteInfo<EditAIProfileRouteArgs> {
+  EditAIProfileRoute({
+    dynamic key,
+    required AIProfileModel profile,
+    List<PageRouteInfo>? children,
+  }) : super(
+          EditAIProfileRoute.name,
+          args: EditAIProfileRouteArgs(
+            key: key,
+            profile: profile,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'EditAIProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<EditAIProfileRouteArgs>();
+      return EditAIProfileScreen(
+        key: args.key,
+        profile: args.profile,
+      );
+    },
+  );
+}
+
+class EditAIProfileRouteArgs {
+  const EditAIProfileRouteArgs({
+    this.key,
+    required this.profile,
+  });
+
+  final dynamic key;
+
+  final AIProfileModel profile;
+
+  @override
+  String toString() {
+    return 'EditAIProfileRouteArgs{key: $key, profile: $profile}';
+  }
+}
+
+/// generated route for
 /// [EditProfileScreen]
 class EditProfileRoute extends PageRouteInfo<void> {
   const EditProfileRoute({List<PageRouteInfo>? children})

@@ -106,9 +106,15 @@ class _ManageAIProfilesScreenState extends State<ManageAIProfilesScreen> {
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.edit, color: Colors.blue),
-                                      onPressed: () {
-                                        // Navigate to edit screen (to be implemented)
-                                        // context.router.push(EditAIProfileRoute(profile: profile));
+                                      onPressed: () async {
+                                        final result = await context.router.push(
+                                          EditAIProfileRoute(profile: profile)
+                                        );
+                                        
+
+                                        if (result == true) {
+                                          context.read<AIProfileProvider>().fetchProfiles();
+                                        }
                                       },
                                     ),
                                     IconButton(

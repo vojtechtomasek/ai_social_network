@@ -65,6 +65,50 @@ class AIProfileProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateAIProfile({
+    required String profileId,
+    required String name,
+    required String personality,
+    required String writingStyle,
+  }) async {
+    if (_isLoading) return false;
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _supabase
+          .from('ai_profiles')
+          .update({
+            'name': name,
+            'personality': personality,
+            'writing_style': writingStyle,
+          })
+          .eq('id', profileId);
+
+      final index = _profiles.indexWhere((profile) => profile.id == profileId);
+      if (index >= 0) {
+        _profiles[index] = AIProfileModel(
+          id: profileId,
+          name: name,
+          personality: personality,
+          writingStyle: writingStyle,
+          createdAt: _profiles[index].createdAt,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> deleteProfile(String profileId) async {
     if (_isLoading) return false;
 

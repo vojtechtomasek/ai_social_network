@@ -1,3 +1,4 @@
+import 'package:ai_social_network/screens/edit_ai_profile_screen/edit_ai_profile_screen.dart';
 import 'package:ai_social_network/screens/manage_ai_profiles_screen/manage_ai_profiles_screen.dart';
 
 import '../screens/create_content_screen/create_content_screen.dart';
@@ -13,6 +14,7 @@ import '../screens/profile_screen/profile_screen.dart';
 import '../screens/following_screen/following_screen.dart';
 import '../screens/followers_screen/followers_screen.dart';
 import '../screens/create_ai_profile_screen/create_ai_profile_screen.dart';
+import '../models/ai_profile_model.dart';
 
 part 'app_router.gr.dart';
 
@@ -33,5 +35,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: CreateContentRoute.page),
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: ManageAIProfilesRoute.page),
+    AutoRoute(page: EditAIProfileRoute.page),
   ];
 }

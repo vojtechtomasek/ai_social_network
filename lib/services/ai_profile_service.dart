@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../provider/ai_profile_provider.dart';
@@ -34,6 +35,54 @@ class AiProfileService {
           nameController.clear();
           personalityController.clear();
           writingStyleController.clear();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${context.read<AIProfileProvider>().error ?? "Unknown error"}')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (context.mounted) {
+        setLoadingState(false);
+      }
+    }
+  }
+
+  static Future<void> updateAIProfile({
+    required BuildContext context,
+    required String profileId,
+    required GlobalKey<FormState> formKey,
+    required TextEditingController nameController,
+    required TextEditingController personalityController,
+    required TextEditingController writingStyleController,
+    required void Function(bool) setLoadingState,
+  }) async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    setLoadingState(true);
+
+    try {
+      final success = await context.read<AIProfileProvider>().updateAIProfile(
+        profileId: profileId,
+        name: nameController.text.trim(),
+        personality: personalityController.text.trim(),
+        writingStyle: writingStyleController.text.trim(),
+      );
+
+      if (context.mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('AI profile updated successfully')),
+          );
+          context.router.back();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: ${context.read<AIProfileProvider>().error ?? "Unknown error"}')),
