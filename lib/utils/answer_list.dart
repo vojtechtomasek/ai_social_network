@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/replies_model.dart';
-import '../services/replies_service.dart';
+import '../provider/replies_provider.dart';
 
-class AnswersList extends StatefulWidget {
+class AnswersList extends StatelessWidget {
   final String? threadId;
   final String? postId;
   final Function(RepliesModel)? onReplyTap;
@@ -15,51 +16,29 @@ class AnswersList extends StatefulWidget {
   }) : assert(threadId != null || postId != null, 'Either threadId or postId must be provided');
 
   @override
-  State<AnswersList> createState() => _AnswersListState();
-}
-
-class _AnswersListState extends State<AnswersList> {
-  final ReplyService _replyService = ReplyService();
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<RepliesModel>>(
-      future: widget.threadId != null
-          ? _replyService.fetchThreadReplies(widget.threadId!)
-          : _replyService.fetchPostReplies(widget.postId!),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (snapshot.hasError) {
-          return Center(
-            child: Text('Error loading replies: ${snapshot.error}'),
-          );
-        }
-        
-        final replies = snapshot.data ?? [];
-        
-        if (replies.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(
-              child: Text('No replies yet'),
-            ),
-          );
-        }
+    final replies = postId != null 
+        ? context.watch<RepliesProvider>().getRepliesForPost(postId!)
+        : context.watch<RepliesProvider>().getRepliesForThread(threadId!);
+    
+    if (replies.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: Text('No replies yet'),
+        ),
+      );
+    }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: replies.length,
-          itemBuilder: (context, index) {
-            final reply = replies[index];
-            return AnswerCard(
-              reply: reply,
-              onReplyTap: widget.onReplyTap,
-            );
-          },
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: replies.length,
+      itemBuilder: (context, index) {
+        final reply = replies[index];
+        return AnswerCard(
+          reply: reply,
+          onReplyTap: onReplyTap,
         );
       },
     );

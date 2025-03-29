@@ -63,7 +63,6 @@ class RepliesProvider extends ChangeNotifier {
     String? threadId,
     String? replyToId,
   }) async {
-    if (_isLoading) return;
     
     final user = _supabase.auth.currentUser;
     if (user == null) {
@@ -71,35 +70,120 @@ class RepliesProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    
-    assert(postId != null || threadId != null, 
-      'Either postId or threadId must be provided');
-    
-    _isLoading = true;
-    notifyListeners();
-    
+
+    assert(postId != null || threadId != null, 'Either postId or threadId must be provided');
+
     try {
-      await _supabase.from('replies').insert({
+      final userProfiles = await _supabase
+          .from('users')
+          .select('first_name, last_name, user_name')
+          .eq('id', user.id)
+          .single();
+
+      String authorName;
+      final firstName = userProfiles['first_name'] ?? '';
+      final lastName = userProfiles['last_name'] ?? '';
+      authorName = '$firstName $lastName'.trim();
+
+      if (authorName.isEmpty) {
+        authorName = userProfiles['user_name'] ?? 'Unknown User';
+      }
+
+      final response = await _supabase.from('replies').insert({
         'content': content,
         'author_user_id': user.id,
         'post_id': postId,
         'thread_id': threadId,
         'reply_to_id': replyToId,
         'created_at': DateTime.now().toIso8601String(),
-      });
-      
+      }).select().single();
+
+      final newReply = RepliesModel(
+        id: response['id'],
+        authorUserId: user.id,
+        content: content,
+        postId: postId,
+        threadId: threadId,
+        replyToId: replyToId,
+        createdAt: response['created_at'],
+        authorName: authorName,
+        isAiAuthor: false,
+        childReplies: [],
+      );
+
       if (postId != null) {
-        await fetchRepliesForPost(postId);
+        if (replyToId == null) {
+          _postReplies[postId] = [...(_postReplies[postId] ?? []), newReply];
+        } else {
+          _addChildReply(postId, replyToId, newReply);
+        }
       } else if (threadId != null) {
-        await fetchRepliesForThread(threadId);
+        if (replyToId == null) {
+          _threadReplies[threadId] = [...(_threadReplies[threadId] ?? []), newReply];
+        } else {
+          _addChildReply(threadId, replyToId, newReply, isThread: true);
+        }
       }
+
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void _addChildReply(String contentId, String parentReplyId, RepliesModel newReply, {bool isThread = false}) {
+    final replies = isThread ? _threadReplies[contentId] : _postReplies[contentId];
+    if (replies == null) return;
+
+    for (int i = 0; i < replies.length; i++) {
+      if (replies[i].id == parentReplyId) {
+        final updatedParent = replies[i].copyWith(
+          childReplies: [...replies[i].childReplies, newReply]
+        );
+
+        final updatedReplies = List<RepliesModel>.from(replies);
+        updatedReplies[i] = updatedParent;
+
+        if (isThread) {
+          _threadReplies[contentId] = updatedReplies;
+        } else {
+          _postReplies[contentId] = updatedReplies;
+        }
+        return;
+      }
+
+      _findAndAddToChildReplies(replies, i, parentReplyId, newReply);
+    }
+  }
+
+  bool _findAndAddToChildReplies(List<RepliesModel> replies, int parentIndex, String targetReplyId, RepliesModel newReply) {
+    final childReplies = replies[parentIndex].childReplies;
+
+    for (int i = 0; i < childReplies.length; i++) {
+      if (childReplies[i].id == targetReplyId) {
+        final updatedChildren = List<RepliesModel>.from(childReplies);
+        updatedChildren[i] = childReplies[i].copyWith(
+          childReplies: [...childReplies[i].childReplies, newReply]
+        );
+
+        replies[parentIndex] = replies[parentIndex].copyWith(
+          childReplies: updatedChildren
+        );
+
+        return true;
+      }
+
+      if (_findAndAddToChildReplies(childReplies, i, targetReplyId, newReply)) {
+        replies[parentIndex] = replies[parentIndex].copyWith(
+          childReplies: childReplies
+        );
+        return true;
+      }
+    }
+
+    return false;
   }
   
   Future<bool> sendMessage({

@@ -56,4 +56,32 @@ class RepliesModel {
       childReplies: childReplies,
     );
   }
+
+  RepliesModel copyWith({
+    String? id,
+    String? authorUserId,
+    String? authorAiId,
+    String? content,
+    String? postId,
+    String? threadId,
+    String? replyToId,
+    String? createdAt,
+    String? authorName,
+    bool? isAiAuthor,
+    List<RepliesModel>? childReplies,
+  }) {
+    return RepliesModel(
+      id: id ?? this.id,
+      authorUserId: authorUserId ?? this.authorUserId,
+      authorAiId: authorAiId ?? this.authorAiId,
+      content: content ?? this.content,
+      postId: postId ?? this.postId,
+      threadId: threadId ?? this.threadId,
+      replyToId: replyToId ?? this.replyToId,
+      createdAt: createdAt ?? this.createdAt,
+      authorName: authorName ?? this.authorName,
+      isAiAuthor: isAiAuthor ?? this.isAiAuthor,
+      childReplies: childReplies ?? this.childReplies,
+    );
+  }
 }
