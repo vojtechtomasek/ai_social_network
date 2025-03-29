@@ -11,8 +11,6 @@ import '../screens/post_detail_screen/post_detail_screen.dart';
 import '../screens/discussion_screen/discussion_screen.dart';
 import '../screens/discussion_detail_screen/discussion_detail_screen.dart';
 import '../screens/profile_screen/profile_screen.dart';
-import '../screens/following_screen/following_screen.dart';
-import '../screens/followers_screen/followers_screen.dart';
 import '../screens/create_ai_profile_screen/create_ai_profile_screen.dart';
 import '../models/ai_profile_model.dart';
 
@@ -30,8 +28,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignUpRoute.page, initial: true),
     AutoRoute(page: PostDetailRoute.page),
     AutoRoute(page: DiscussionDetailRoute.page),
-    AutoRoute(page: FollowersRoute.page),
-    AutoRoute(page: FollowersRoute.page),
     AutoRoute(page: CreateContentRoute.page),
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: ManageAIProfilesRoute.page),

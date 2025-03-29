@@ -214,44 +214,6 @@ class EditProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [FollowersScreen]
-class FollowersRoute extends PageRouteInfo<void> {
-  const FollowersRoute({List<PageRouteInfo>? children})
-      : super(
-          FollowersRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'FollowersRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const FollowersScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [FollowingScreen]
-class FollowingRoute extends PageRouteInfo<void> {
-  const FollowingRoute({List<PageRouteInfo>? children})
-      : super(
-          FollowingRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'FollowingRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const FollowingScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [HomeScreen]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})
