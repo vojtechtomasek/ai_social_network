@@ -1,3 +1,4 @@
+import 'package:ai_social_network/utils/bookmark_button.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../../../routes/app_router.dart';
@@ -52,6 +53,9 @@ class PostCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const Spacer(),
+                  
+                  BookmarkButton(postId: postId,),
+                  
                   Text(
                     '${timestamp.toLocal()}'.split(' ')[0],
                     style: const TextStyle(color: Colors.grey),

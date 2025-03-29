@@ -1,3 +1,4 @@
+import 'package:ai_social_network/screens/profile_screen/widgets/saved_content_section.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../../routes/app_router.dart';
 import '../../utils/bottom_nav_bar_widget.dart';
 import 'widgets/content_toggle_bar.dart';
 import 'widgets/settings_menu.dart';
+import '../../provider/saved_content_provider.dart';
 
 @RoutePage()
 class ProfileScreen extends StatefulWidget {
@@ -23,13 +25,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().loadUserData();
+      _loadSavedContent();
     });
+  }
+
+  void _loadSavedContent() async {
+    if (_showingSavedPosts) {
+      await context.read<SavedContentProvider>().fetchSavedPosts();
+    } else {
+      await context.read<SavedContentProvider>().fetchSavedDiscussions();
+    }
   }
 
   void _toggleSavedContent() {
     setState(() {
       _showingSavedPosts = !_showingSavedPosts;
     });
+    _loadSavedContent();
   }
 
   void _signOut(BuildContext context) async {
@@ -119,7 +131,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            
                             ContentToggleBar(
                               showFirstOption: _showingSavedPosts,
                               onToggle: _toggleSavedContent,
@@ -127,25 +138,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                       ),
-                      Container(
-                        height: 200,
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        alignment: Alignment.center,
-                        child: Text(
-                          _showingSavedPosts
-                              ? 'This section will display your saved posts.'
-                              : 'This section will display your saved discussions.',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
+                      SavedContentSection(
+                        showingSavedPosts: _showingSavedPosts,
+                        loadSavedContent: _loadSavedContent,
+                        buildEmptyState: _buildEmptyState,
+                      )
                     ],
                   ),
                 ),
       bottomNavigationBar: const BottomNavWidget(currentIndex: 4),
+    );
+  }
+
+  Widget _buildEmptyState(String title, String subtitle) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.bookmark_border,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

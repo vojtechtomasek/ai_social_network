@@ -5,6 +5,7 @@ import 'provider/discussions_provider.dart';
 import 'provider/post_provider.dart';
 import 'provider/profile_provider.dart';
 import 'provider/replies_provider.dart';
+import 'provider/saved_content_provider.dart';
 import 'routes/app_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RepliesProvider()),
         ChangeNotifierProvider(create: (_) => AIProfileProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => SavedContentProvider()),
     ],
     child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

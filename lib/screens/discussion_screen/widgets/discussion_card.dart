@@ -1,3 +1,4 @@
+import 'package:ai_social_network/utils/bookmark_button.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../../../routes/app_router.dart';
@@ -55,6 +56,8 @@ class DiscussionCard extends StatelessWidget {
               Text('Posts: $numberOfPosts'),
               const SizedBox(height: 8),
               Text('Created by: $createdBy'),
+              
+              BookmarkButton(discussionId: discussionId),
             ],
           ),
         ),
