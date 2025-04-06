@@ -211,4 +211,49 @@ class RepliesProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+
+Future<void> fetchRepliesForParent(String parentReplyId) async {
+  if (_isLoading) return;
+  
+  
+  try {
+    final childReplies = await _replyService.fetchNestedReplies(parentReplyId);
+    
+    for (final postId in _postReplies.keys) {
+      _updateReplyChildrenInList(
+        _postReplies[postId]!, 
+        parentReplyId, 
+        childReplies
+      );
+    }
+    
+    for (final threadId in _threadReplies.keys) {
+      _updateReplyChildrenInList(
+        _threadReplies[threadId]!, 
+        parentReplyId, 
+        childReplies
+      );
+    }
+    
+    notifyListeners();
+  } catch (e) {
+    print('Error fetching child replies: $e');
+  }
+}
+
+bool _updateReplyChildrenInList(List<RepliesModel> replies, String parentReplyId, List<RepliesModel> childReplies) {
+  for (int i = 0; i < replies.length; i++) {
+    if (replies[i].id == parentReplyId) {
+      replies[i] = replies[i].copyWith(childReplies: childReplies);
+      return true;
+    }
+    
+    if (_updateReplyChildrenInList(replies[i].childReplies, parentReplyId, childReplies)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 }

@@ -45,7 +45,7 @@ class AnswersList extends StatelessWidget {
   }
 }
 
-class AnswerCard extends StatelessWidget {
+class AnswerCard extends StatefulWidget {
   final RepliesModel reply;
   final Function(RepliesModel)? onReplyTap;
   
@@ -56,11 +56,19 @@ class AnswerCard extends StatelessWidget {
   });
 
   @override
+  State<AnswerCard> createState() => _AnswerCardState();
+}
+
+class _AnswerCardState extends State<AnswerCard> {
+  bool _expanded = false;
+  bool _loadingReplies = false;
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: InkWell(
-        onTap: onReplyTap != null ? () => onReplyTap!(reply) : null,
+        onTap: widget.onReplyTap != null ? () => widget.onReplyTap!(widget.reply) : null,
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -72,14 +80,14 @@ class AnswerCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Icon(
-                      reply.isAiAuthor ? Icons.smart_toy : Icons.person,
-                      color: reply.isAiAuthor ? Colors.blue : Colors.green,
+                      widget.reply.isAiAuthor ? Icons.smart_toy : Icons.person,
+                      color: widget.reply.isAiAuthor ? Colors.blue : Colors.green,
                       size: 18,
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      '${reply.authorName} • ${_formatTimestamp(reply.createdAt)}',
+                      '${widget.reply.authorName} • ${_formatTimestamp(widget.reply.createdAt)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[800],
@@ -88,7 +96,7 @@ class AnswerCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (onReplyTap != null)
+                  if (widget.onReplyTap != null)
                     Icon(
                       Icons.reply, 
                       size: 14,
@@ -98,19 +106,86 @@ class AnswerCard extends StatelessWidget {
               ),
 
               const SizedBox(height: 8),
-              Text(reply.content),
+              Text(widget.reply.content),
               
-              if (reply.childReplies.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 24.0, top: 16.0),
-                  child: Column(
-                    children: reply.childReplies
-                        .map((childReply) => AnswerCard(
-                              reply: childReply,
-                              onReplyTap: onReplyTap,
-                            ))
-                        .toList(),
+              if (widget.reply.childReplies.isNotEmpty && !_expanded)
+                InkWell(
+                  onTap: _toggleExpanded,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.forum_outlined,
+                          size: 14,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.reply.childReplies.length} ${widget.reply.childReplies.length == 1 ? 'reply' : 'replies'}',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+              
+              if (_expanded)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    if (_loadingReplies)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24.0, top: 8.0),
+                        child: Column(
+                          children: widget.reply.childReplies
+                              .map((childReply) => AnswerCard(
+                                    reply: childReply,
+                                    onReplyTap: widget.onReplyTap,
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    
+                    InkWell(
+                      onTap: _toggleExpanded,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.unfold_less,
+                              size: 14,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Hide replies',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),
@@ -118,27 +193,51 @@ class AnswerCard extends StatelessWidget {
       ),
     );
   }
-  
-  String _formatTimestamp(String dateString) {
-    try {
-      final date = DateTime.parse(dateString).toLocal();
-      final now = DateTime.now();
 
-      final difference = now.difference(date);
-
-      if (difference.isNegative || difference.inSeconds < 5) {
-        return 'Just now';
-      } else if (difference.inMinutes < 60) {
-        return '${difference.inMinutes} min ago';
-      } else if (difference.inHours < 24) {
-        return '${difference.inHours} hours ago';
-      } else if (difference.inDays < 30) {
-        return '${difference.inDays} days ago';
-      } else {
-        return '${date.day}/${date.month}/${date.year}';
+  void _toggleExpanded() {
+    setState(() {
+      _expanded = !_expanded;
+      
+      if (_expanded && widget.reply.childReplies.isEmpty) {
+        _loadReplies();
       }
-    } catch (e) {
-      return dateString;
+    });
+  }
+
+  Future<void> _loadReplies() async {
+    setState(() {
+      _loadingReplies = true;
+    });
+    
+    try {
+      if (widget.reply.childReplies.isEmpty) {
+        final repliesProvider = context.read<RepliesProvider>();
+        await repliesProvider.fetchRepliesForParent(widget.reply.id);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingReplies = false;
+        });
+      }
+    }
+  }
+
+  String _formatTimestamp(String timestamp) {
+    final dateTime = DateTime.parse(timestamp);
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 7) {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
     }
   }
 }
