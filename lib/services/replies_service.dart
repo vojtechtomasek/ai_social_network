@@ -4,65 +4,60 @@ import '../models/replies_model.dart';
 class ReplyService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-Future<List<RepliesModel>> fetchPostReplies(String postId, {bool fetchChildren = false}) async {
-  return _fetchReplies(postId: postId, fetchChildren: fetchChildren);
-}
+  Future<List<RepliesModel>> fetchPostReplies(String postId,
+      {int offset = 0, int limit = 10}) async {
+    return _fetchReplies(postId: postId, offset: offset, limit: limit);
+  }
 
-Future<List<RepliesModel>> fetchThreadReplies(String threadId, {bool fetchChildren = false}) async {
-  return _fetchReplies(threadId: threadId, fetchChildren: fetchChildren);
-}
+  Future<List<RepliesModel>> fetchThreadReplies(String threadId,
+      {int offset = 0, int limit = 10}) async {
+    return _fetchReplies(threadId: threadId, offset: offset, limit: limit);
+  }
 
   Future<List<RepliesModel>> fetchNestedReplies(String replyId) async {
     return _fetchReplies(replyToId: replyId);
   }
 
   Future<List<RepliesModel>> _fetchReplies({
-  String? postId,
-  String? threadId,
-  String? replyToId,
-  bool fetchChildren = false,
-}) async {
-  try {
-    final query = _supabase.from('replies').select('''
+    String? postId,
+    String? threadId,
+    String? replyToId,
+    int offset = 0,
+    int limit = 10,
+  }) async {
+    try {
+      final query = _supabase.from('replies').select('''
       *,
       users(*),
       ai_profiles(*)
     ''');
 
-    PostgrestFilterBuilder filteredQuery;
+      PostgrestFilterBuilder filteredQuery;
 
-    if (postId != null) {
-      filteredQuery = query
-        .eq('post_id', postId)
-        .filter('reply_to_id', 'is', null);
-    } else if (threadId != null) {
-      filteredQuery = query
-        .eq('thread_id', threadId)
-        .filter('reply_to_id', 'is', null);
-    } else if (replyToId != null) {
-      filteredQuery = query.eq('reply_to_id', replyToId);
-    } else {
-      filteredQuery = query;
+      if (postId != null) {
+        filteredQuery =
+            query.eq('post_id', postId).filter('reply_to_id', 'is', null);
+      } else if (threadId != null) {
+        filteredQuery =
+            query.eq('thread_id', threadId).filter('reply_to_id', 'is', null);
+      } else if (replyToId != null) {
+        filteredQuery = query.eq('reply_to_id', replyToId);
+      } else {
+        filteredQuery = query;
+      }
+
+      final response = await filteredQuery
+          .order('created_at', ascending: true)
+          .range(offset, offset + limit - 1);
+
+      return (response as List)
+          .map((item) => RepliesModel.fromJson(item))
+          .toList();
+    } catch (e) {
+      print('Error fetching replies: $e');
+      return [];
     }
-
-    final response = await filteredQuery.order('created_at', ascending: true);
-
-    final List<RepliesModel> replies = [];
-
-    for (var item in response) {
-      final childReplies = fetchChildren 
-          ? await fetchNestedReplies(item['id'])
-          : <RepliesModel>[];
-          
-      replies.add(RepliesModel.fromJson(item, childReplies: childReplies));
-    }
-
-    return replies;
-  } catch (e) {
-    print('Error fetching replies: $e');
-    return [];
   }
-}
 
   Future<void> createPostReply({
     required String postId,

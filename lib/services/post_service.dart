@@ -3,8 +3,8 @@ import '../models/post_model.dart';
 
 class PostService {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
-
-  Future<List<PostModel>> fetchPosts() async {
+  
+  Future<List<PostModel>> fetchPosts({int offset = 0, int limit = 10}) async {
     final response = await _supabaseClient
         .from('posts')
         .select('''
@@ -12,7 +12,8 @@ class PostService {
           users(*),
           ai_profiles(*)
         ''')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
         
     if (response.isEmpty) {
       return [];

@@ -8,29 +8,47 @@ class RepliesProvider extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
   
   final Map<String, List<RepliesModel>> _postReplies = {};
+  final Map<String, bool> _hasMorePostReplies = {}; // Track if more replies exist for each post
+  final Map<String, bool> _isLoadingMorePostReplies = {}; // Track loading state for each post
+
   final Map<String, List<RepliesModel>> _threadReplies = {};
+  final Map<String, bool> _hasMoreThreadReplies = {}; // Track if more replies exist for each thread
+  final Map<String, bool> _isLoadingMoreThreadReplies = {}; // Track loading state for each thread
+
   bool _isLoading = false;
   String? _error;
-  
+
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  List<RepliesModel> getRepliesForPost(String postId) => _postReplies[postId] ?? [];
+  List<RepliesModel> getRepliesForThread(String threadId) => _threadReplies[threadId] ?? [];
+  bool hasMoreRepliesForPost(String postId) => _hasMorePostReplies[postId] ?? true;
+  bool isLoadingMoreRepliesForPost(String postId) => _isLoadingMorePostReplies[postId] ?? false;
+  bool hasMoreRepliesForThread(String threadId) => _hasMoreThreadReplies[threadId] ?? true;
+  bool isLoadingMoreRepliesForThread(String threadId) => _isLoadingMoreThreadReplies[threadId] ?? false;
   
-  List<RepliesModel> getRepliesForPost(String postId) => 
-      _postReplies[postId] ?? [];
-      
-  List<RepliesModel> getRepliesForThread(String threadId) => 
-      _threadReplies[threadId] ?? [];
-  
-  Future<void> fetchRepliesForPost(String postId) async {
+  Future<void> fetchRepliesForPost(String postId, {bool refresh = false}) async {
     if (_isLoading) return;
-    
+
+    if (refresh) {
+      _postReplies[postId] = [];
+      _hasMorePostReplies[postId] = true;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
-      final replies = await _replyService.fetchPostReplies(postId);
-      _postReplies[postId] = replies;
+      final offset = _postReplies[postId]?.length ?? 0;
+      final replies = await _replyService.fetchPostReplies(postId, offset: offset);
+
+      if (replies.isEmpty) {
+        _hasMorePostReplies[postId] = false;
+      } else {
+        _postReplies[postId] = [...(_postReplies[postId] ?? []), ...replies];
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -38,21 +56,78 @@ class RepliesProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> loadMoreRepliesForPost(String postId) async {
+    if (_isLoadingMorePostReplies[postId] == true || !hasMoreRepliesForPost(postId)) return;
+
+    _isLoadingMorePostReplies[postId] = true;
+    notifyListeners();
+
+    try {
+      final offset = _postReplies[postId]?.length ?? 0;
+      final replies = await _replyService.fetchPostReplies(postId, offset: offset);
+
+      if (replies.isEmpty) {
+        _hasMorePostReplies[postId] = false;
+      } else {
+        _postReplies[postId] = [...(_postReplies[postId] ?? []), ...replies];
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoadingMorePostReplies[postId] = false;
+      notifyListeners();
+    }
+  }
   
-  Future<void> fetchRepliesForThread(String threadId) async {
+  Future<void> fetchRepliesForThread(String threadId, {bool refresh = false}) async {
     if (_isLoading) return;
-    
+
+    if (refresh) {
+      _threadReplies[threadId] = [];
+      _hasMoreThreadReplies[threadId] = true;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
-      final replies = await _replyService.fetchThreadReplies(threadId);
-      _threadReplies[threadId] = replies;
+      final offset = _threadReplies[threadId]?.length ?? 0;
+      final replies = await _replyService.fetchThreadReplies(threadId, offset: offset);
+
+      if (replies.isEmpty) {
+        _hasMoreThreadReplies[threadId] = false;
+      } else {
+        _threadReplies[threadId] = [...(_threadReplies[threadId] ?? []), ...replies];
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreRepliesForThread(String threadId) async {
+    if (_isLoadingMoreThreadReplies[threadId] == true || !hasMoreRepliesForThread(threadId)) return;
+
+    _isLoadingMoreThreadReplies[threadId] = true;
+    notifyListeners();
+
+    try {
+      final offset = _threadReplies[threadId]?.length ?? 0;
+      final replies = await _replyService.fetchThreadReplies(threadId, offset: offset);
+
+      if (replies.isEmpty) {
+        _hasMoreThreadReplies[threadId] = false;
+      } else {
+        _threadReplies[threadId] = [...(_threadReplies[threadId] ?? []), ...replies];
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoadingMoreThreadReplies[threadId] = false;
       notifyListeners();
     }
   }

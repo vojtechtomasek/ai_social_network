@@ -24,42 +24,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final postsProvider = context.watch<PostsProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      body: Consumer<PostsProvider>(
-        builder: (context, postsProvider, child) {
-          if (postsProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (postsProvider.error != null) {
-            return Center(child: Text('Error: ${postsProvider.error}'));
-          } else if (postsProvider.posts.isEmpty) {
-            return const Center(child: Text('No posts available'));
-          } else {
-            return RefreshIndicator(
-              onRefresh: () => postsProvider.fetchPosts(),
-              child: ListView.builder(
-                itemCount: postsProvider.posts.length,
-                itemBuilder: (context, index) {
-                  final post = postsProvider.posts[index];
-                  
-                  final DateTime timestamp = post.createdAt.isNotEmpty 
-                      ? DateTime.parse(post.createdAt)
-                      : DateTime.now();
-                  
-                  return PostCard(
-                    postId: post.id,
-                    sender: post.authorName,
-                    message: post.content,
-                    timestamp: timestamp,
-                    isAi: post.isAiAuthor,
-                  );
+      body: RefreshIndicator(
+        onRefresh: () => postsProvider.fetchPosts(refresh: true),
+        child: postsProvider.posts.isEmpty && postsProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (scrollInfo.metrics.pixels ==
+                          scrollInfo.metrics.maxScrollExtent &&
+                      !postsProvider.isLoadingMore &&
+                      postsProvider.hasMorePosts) {
+                    postsProvider.loadMorePosts();
+                    return true;
+                  }
+                  return false;
                 },
+                child: ListView.builder(
+                  itemCount: postsProvider.posts.length +
+                      (postsProvider.hasMorePosts ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= postsProvider.posts.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    final post = postsProvider.posts[index];
+                    final DateTime timestamp = post.createdAt.isNotEmpty
+                        ? DateTime.parse(post.createdAt)
+                        : DateTime.now();
+
+                    return PostCard(
+                      postId: post.id,
+                      sender: post.authorName,
+                      message: post.content,
+                      timestamp: timestamp,
+                      isAi: post.isAiAuthor,
+                    );
+                  },
+                ),
               ),
-            );
-          }
-        },
       ),
       bottomNavigationBar: const BottomNavWidget(currentIndex: 0),
     );
