@@ -75,7 +75,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         bio: bio ?? '',
       );
   
-      // Insert using the model
       await supabase.from('users').insert(user.toMap());
       print('Profile created successfully for user: $userId');
     } catch (e) {

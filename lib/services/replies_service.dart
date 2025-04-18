@@ -47,7 +47,7 @@ class ReplyService {
       }
 
       final response = await filteredQuery
-          .order('created_at', ascending: true)
+          .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
       return (response as List)

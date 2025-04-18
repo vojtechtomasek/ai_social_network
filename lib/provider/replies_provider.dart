@@ -188,13 +188,13 @@ class RepliesProvider extends ChangeNotifier {
 
       if (postId != null) {
         if (replyToId == null) {
-          _postReplies[postId] = [...(_postReplies[postId] ?? []), newReply];
+          _postReplies[postId] = [newReply, ...(_postReplies[postId] ?? [])];
         } else {
           _addChildReply(postId, replyToId, newReply);
         }
       } else if (threadId != null) {
         if (replyToId == null) {
-          _threadReplies[threadId] = [...(_threadReplies[threadId] ?? []), newReply];
+          _threadReplies[threadId] = [newReply, ...(_threadReplies[threadId] ?? [])];
         } else {
           _addChildReply(threadId, replyToId, newReply, isThread: true);
         }
@@ -215,7 +215,7 @@ class RepliesProvider extends ChangeNotifier {
     for (int i = 0; i < replies.length; i++) {
       if (replies[i].id == parentReplyId) {
         final updatedParent = replies[i].copyWith(
-          childReplies: [...replies[i].childReplies, newReply]
+          childReplies: [newReply, ...replies[i].childReplies]
         );
 
         final updatedReplies = List<RepliesModel>.from(replies);
@@ -240,7 +240,7 @@ class RepliesProvider extends ChangeNotifier {
       if (childReplies[i].id == targetReplyId) {
         final updatedChildren = List<RepliesModel>.from(childReplies);
         updatedChildren[i] = childReplies[i].copyWith(
-          childReplies: [...childReplies[i].childReplies, newReply]
+          childReplies: [newReply, ...childReplies[i].childReplies]
         );
 
         replies[parentIndex] = replies[parentIndex].copyWith(
