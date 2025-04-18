@@ -21,9 +21,18 @@ class AIProfileProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        _error = 'User not authenticated';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+
       final response = await _supabase
           .from('ai_profiles')
           .select()
+          .eq('user_id', userId)
           .order('created_at', ascending: false);
       
       _profiles = (response as List).map((data) => AIProfileModel.fromJson(data)).toList();
@@ -42,6 +51,13 @@ class AIProfileProvider extends ChangeNotifier {
   }) async {
     if (_isLoading) return false;
     
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      _error = 'User not authenticated';
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     notifyListeners();
     
@@ -51,6 +67,7 @@ class AIProfileProvider extends ChangeNotifier {
         'personality': personality,
         'writing_style': writingStyle,
         'created_at': DateTime.now().toIso8601String(),
+        'user_id': userId,
       });
       
       await fetchProfiles();
@@ -73,6 +90,13 @@ class AIProfileProvider extends ChangeNotifier {
   }) async {
     if (_isLoading) return false;
 
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      _error = 'User not authenticated';
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -85,7 +109,8 @@ class AIProfileProvider extends ChangeNotifier {
             'personality': personality,
             'writing_style': writingStyle,
           })
-          .eq('id', profileId);
+          .eq('id', profileId)
+          .eq('user_id', userId);
 
       final index = _profiles.indexWhere((profile) => profile.id == profileId);
       if (index >= 0) {
@@ -95,6 +120,7 @@ class AIProfileProvider extends ChangeNotifier {
           personality: personality,
           writingStyle: writingStyle,
           createdAt: _profiles[index].createdAt,
+          userId: _profiles[index].userId,
         );
       }
 
@@ -112,6 +138,13 @@ class AIProfileProvider extends ChangeNotifier {
   Future<bool> deleteProfile(String profileId) async {
     if (_isLoading) return false;
 
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      _error = 'User not authenticated';
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     notifyListeners();
 
@@ -119,7 +152,8 @@ class AIProfileProvider extends ChangeNotifier {
       await _supabase
           .from('ai_profiles')
           .delete()
-          .eq('id', profileId);
+          .eq('id', profileId)
+          .eq('user_id', userId);
 
       _profiles.removeWhere((profile) => profile.id == profileId);
       notifyListeners();

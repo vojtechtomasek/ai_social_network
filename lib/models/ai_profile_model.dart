@@ -4,6 +4,7 @@ class AIProfileModel {
   final String personality;
   final String writingStyle;
   final String createdAt;
+  final String userId;
   
   AIProfileModel({
     required this.id,
@@ -11,6 +12,7 @@ class AIProfileModel {
     required this.personality,
     required this.writingStyle,
     required this.createdAt,
+    required this.userId,
   });
   
   factory AIProfileModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class AIProfileModel {
       personality: json['personality'],
       writingStyle: json['writing_style'],
       createdAt: json['created_at'],
+      userId: json['user_id'],
     );
   }
 }

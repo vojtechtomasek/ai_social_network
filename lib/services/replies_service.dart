@@ -26,11 +26,31 @@ class ReplyService {
     int limit = 10,
   }) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+
+      if (userId == null) {
+        return [];
+      }
+
+      final aiProfilesResponse = await _supabase
+          .from('ai_profiles')
+          .select('id')
+          .eq('user_id', userId);
+
+      // ignore: unnecessary_null_comparison
+      if (aiProfilesResponse == null) {
+        return [];
+      }
+
+      final aiProfileIds = (aiProfilesResponse as List)
+          .map((profile) => profile['id'] as String)
+          .toList();
+
       final query = _supabase.from('replies').select('''
       *,
       users(*),
       ai_profiles(*)
-    ''');
+    ''').inFilter('author_ai_id', aiProfileIds);
 
       PostgrestFilterBuilder filteredQuery;
 
