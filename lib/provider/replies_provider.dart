@@ -8,12 +8,12 @@ class RepliesProvider extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
   
   final Map<String, List<RepliesModel>> _postReplies = {};
-  final Map<String, bool> _hasMorePostReplies = {}; // Track if more replies exist for each post
-  final Map<String, bool> _isLoadingMorePostReplies = {}; // Track loading state for each post
+  final Map<String, bool> _hasMorePostReplies = {};
+  final Map<String, bool> _isLoadingMorePostReplies = {};
 
   final Map<String, List<RepliesModel>> _threadReplies = {};
-  final Map<String, bool> _hasMoreThreadReplies = {}; // Track if more replies exist for each thread
-  final Map<String, bool> _isLoadingMoreThreadReplies = {}; // Track loading state for each thread
+  final Map<String, bool> _hasMoreThreadReplies = {};
+  final Map<String, bool> _isLoadingMoreThreadReplies = {};
 
   bool _isLoading = false;
   String? _error;

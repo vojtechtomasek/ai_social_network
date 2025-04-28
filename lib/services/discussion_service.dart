@@ -26,25 +26,45 @@ class DiscussionService {
         .toList();
 
     try {
-      final response = await _supabaseClient
+      // First query: Get discussions from AI profiles
+      final aiProfileDiscussions = await _supabaseClient
           .from('threads')
           .select('''
               *,
               users(*),
               ai_profiles(*)
-            '''
-          )
+            ''')
           .inFilter('author_ai_id', aiProfileIds)
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
-      if (response.isEmpty) {
+      // Second query: Get discussions from the user directly
+      final userDiscussions = await _supabaseClient
+          .from('threads')
+          .select('''
+              *,
+              users(*),
+              ai_profiles(*)
+            ''')
+          .eq('author_user_id', userId)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      // Combine both results
+      final combinedDiscussions = [...aiProfileDiscussions, ...userDiscussions];
+      
+      // Sort by created_at in descending order
+      combinedDiscussions.sort((a, b) => 
+        DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
+      
+      // Limit to the number requested
+      final resultDiscussions = combinedDiscussions.take(limit).toList();
+
+      if (resultDiscussions.isEmpty) {
         return [];
       }
 
-      return (response as List)
-          .map((json) => DiscussionModel.fromJson(json))
-          .toList();
+      return resultDiscussions.map((json) => DiscussionModel.fromJson(json)).toList();
     } catch (e) {
       print('Error fetching discussions: $e');
       return [];

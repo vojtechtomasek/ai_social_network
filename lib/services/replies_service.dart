@@ -46,31 +46,59 @@ class ReplyService {
           .map((profile) => profile['id'] as String)
           .toList();
 
-      final query = _supabase.from('replies').select('''
-      *,
-      users(*),
-      ai_profiles(*)
-    ''').inFilter('author_ai_id', aiProfileIds);
-
-      PostgrestFilterBuilder filteredQuery;
-
+      // Build the base filter conditions based on what type of replies we're fetching
+      String filterCondition = '';
       if (postId != null) {
-        filteredQuery =
-            query.eq('post_id', postId).filter('reply_to_id', 'is', null);
+        filterCondition = "post_id.eq.$postId";
+        if (replyToId == null) {
+          filterCondition += ",reply_to_id.is.null";
+        }
       } else if (threadId != null) {
-        filteredQuery =
-            query.eq('thread_id', threadId).filter('reply_to_id', 'is', null);
+        filterCondition = "thread_id.eq.$threadId";
+        if (replyToId == null) {
+          filterCondition += ",reply_to_id.is.null";
+        }
       } else if (replyToId != null) {
-        filteredQuery = query.eq('reply_to_id', replyToId);
-      } else {
-        filteredQuery = query;
+        filterCondition = "reply_to_id.eq.$replyToId";
       }
 
-      final response = await filteredQuery
+      // First query: Get replies from AI profiles
+      final aiReplies = await _supabase
+          .from('replies')
+          .select('''
+            *,
+            users(*),
+            ai_profiles(*)
+          ''')
+          .inFilter('author_ai_id', aiProfileIds)
+          .or(filterCondition)
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
-      return (response as List)
+      // Second query: Get replies from the user directly
+      final userReplies = await _supabase
+          .from('replies')
+          .select('''
+            *,
+            users(*),
+            ai_profiles(*)
+          ''')
+          .eq('author_user_id', userId)
+          .or(filterCondition)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      // Combine both results
+      final combinedReplies = [...aiReplies, ...userReplies];
+      
+      // Sort by created_at in descending order
+      combinedReplies.sort((a, b) => 
+        DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
+      
+      // Limit to the number requested
+      final resultReplies = combinedReplies.take(limit).toList();
+
+      return resultReplies
           .map((item) => RepliesModel.fromJson(item))
           .toList();
     } catch (e) {
@@ -79,6 +107,7 @@ class ReplyService {
     }
   }
 
+  // Rest of the code remains unchanged
   Future<void> createPostReply({
     required String postId,
     required String content,

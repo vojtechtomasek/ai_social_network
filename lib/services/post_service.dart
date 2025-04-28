@@ -25,22 +25,44 @@ class PostService {
         .map((profile) => profile['id'] as String)
         .toList();
 
-    final response = await _supabaseClient
+    // First query: Get posts from AI profiles
+    final aiProfilePosts = await _supabaseClient
         .from('posts')
         .select('''
             *,
             users(*),
             ai_profiles(*)
-          '''
-        )
+          ''')
         .inFilter('author_ai_id', aiProfileIds)
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    if (response.isEmpty) {
+    // Second query: Get posts from the user directly
+    final userPosts = await _supabaseClient
+        .from('posts')
+        .select('''
+            *,
+            users(*),
+            ai_profiles(*)
+          ''')
+        .eq('author_user_id', userId)
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+
+    // Combine both results
+    final combinedPosts = [...aiProfilePosts, ...userPosts];
+    
+    // Sort by created_at in descending order
+    combinedPosts.sort((a, b) => 
+      DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
+    
+    // Limit to the number requested
+    final resultPosts = combinedPosts.take(limit).toList();
+
+    if (resultPosts.isEmpty) {
       return [];
     }
 
-    return (response as List).map((json) => PostModel.fromJson(json)).toList();
+    return resultPosts.map((json) => PostModel.fromJson(json)).toList();
   }
 }
